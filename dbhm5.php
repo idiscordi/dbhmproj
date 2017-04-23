@@ -1,12 +1,12 @@
 <?php
-	$serveraddr = 'localhost';
-	$dbloginname = 'jtvaught';
-	$dbloginpw = "owoh4che";
-	$altpw = 'Shit4keMu5Hr00mz';
-	$dbhost = 'turing';
+	#$serveraddr = 'localhost';
+	#$dbloginname = 'jtvaught';
+	#$dbloginpw = "owoh4Che";
+	#$altpw = 'Shit4keMu5Hr00mz';
+	#$dbhost = 'turing';
 	$dbconn;
 	$sqlreturn;
-	$retrow;
+	$response;
 	ini_set('display_errors', 1);
 ?>
 <title>DB Homework 5 Project Site</title>
@@ -23,7 +23,6 @@
 				$dbconn = mysqli_connect('turing', 'jtvaught', 'owoh4Che', 'jtvaught', 3306);
 			}
 			catch(Exception $e) {
-				echo("exception");
 				die('Error connecting to database.');
 			}
          
@@ -44,35 +43,155 @@
 		
 		#form and submit query for inserting a student
 		function dbAddStudent() {
+			global $dbconn, $response;
+			$error = false;
 			
+			
+			if($_REQUEST["studentName"] == "" || !ctype_alpha(str_replace(' ', '', $_REQUEST["studentName"]))) {
+				$error = true;
+				echo("<br>Invalid student name given.  May not contain numeral, apostrophe, or dash<br>");
+			}
+			
+			if(!$error) {
+				$query = "INSERT INTO Student (studentName, major) VALUES ('" . $_REQUEST["studentName"] . "'" .
+					", '" . $_REQUEST["dept"] . "')";
+				dbConnect();
+				$response = mysqli_query($dbconn, $query);
+			}
+			if (!$response) {
+				echo("<br>No data found.<br>");
+			}
+			else {
+				displayTablePage();
+			}
+			
+			dbDisconnect();
 		}
 		
 		#form and submit query for adding a course
 		function dbAddCourse() {
+			global $dbconn, $response;
+			$query;
+			$error = false;
+			dbConnect();
 			
+			if($_REQUEST["courseNum"] == "" || !ctype_digit($_REQUEST["courseNum"]) ||
+				(ctype_digit($_REQUEST["courseNum"]) && courseNum >= 9999) ) {
+					
+				$error = true;
+				echo("<br>Invalid course number given.  May only contain numerals 0-9, and less than 10000<br>");
+			}
+			if($_REQUEST["courseTitle"] == "") {
+				$error = true;
+				echo("<br>Invalid course title given.  You must enter a title.<br>");
+			}
+			if($_REQUEST["creditHours"] == "" || !ctype_digit($_REQUEST["creditHours"]) ||
+				(ctype_digit($_REQUEST["creditHours"]) && $_REQUEST["creditHours"] > 9) ) {
+				$error = true;
+				echo("<br>Invalid course number given.  May only contain numerals 0-9, and less than 10<br>");
+			}
+			
+			if(!$error) {
+				$query = "INSERT INTO Course (deptCode, courseNum, title, creditHours) " .
+						"VALUES ('" . $_REQUEST["dept"] . "', " . $_REQUEST["courseNum"] . ", '" .
+						$_REQUEST["courseTitle"] . "', " . $_REQUEST["creditHours"] . "";
+				dbConnect();
+				
+				
+			}
+			dbDisconnect();
 		}
 		
 		#form and submit query for adding application
 		function dbAddApplication() {
+			global $dbconn;
+			$queryStr;
+			$error = false;
 			
+			if($_REQUEST["courseNum"] == "" || !ctype_digit($_REQUEST["courseNum"]) ||
+				(ctype_digit($_REQUEST["courseNum"]) && courseNum >= 9999) ) {
+				
+				$error = true;
+				echo("<br>Invalid course number given.  May only contain numerals 0-9, and less than 10000<br>");
+			}
+			if($_REQUEST["studentName"] == "" || !ctype_alpha(str_replace(' ', '', $_REQUEST["studentName"]))) {
+				$error = true;
+				echo("<br>Invalid student name given.  May not contain numeral, apostrophe, or dash<br>");
+			}
+			
+			if(!$error) {
+				dbConnect();
+				
+				
+			}
+			
+			dbDisconnect();
 		}
 		
 		#form and submit query for getting all students
 		function dbGetStudents() {
+			global $dbconn, $response;
 			
-			displayTablePage();
+			$query = "SELECT * FROM Student";
+			dbConnect();
+			
+			$response = mysqli_query($dbconn, $query);
+			if($response) {
+				displayTablePage();
+			}
+			else {
+				echo("<br>No results found.<br>");
+			}
+			
+			dbDisconnect();
 		}
 		
 		#form and submit query for getting all courses by dept
 		function dbGetCoursesByDept() {
+			global $dbconn, $response;
+
+			$query = "SELECT * FROM Course WHERE deptCode='" . $_REQUEST["dept"] . "'";
+			dbConnect();
 			
+			$response = mysqli_query($dbconn, $query);
+			if($response) {
+					displayTablePage();
+			}
+			else {
+				echo("<br>No results found.<br>");
+			}
+				
 			displayTablePage();
+			
+			dbDiscconnect();
 		}
 		
 		#form and submit query for getting all courses by a student
 		function dbGetCoursesByStudent() {
+			global $dbconn;
+			$error = false;
 			
-			displayTablePage();
+			if(!ctype_digit($_REQUEST["studentID"])) {
+				$error = true;
+				echo("<br>Invalid student ID.  Numerals only.<br>");
+			}
+			
+			if(!$error) {
+				$query = "SELECT Course.dept, Course.courseNum, title, creditHours FROM" .
+						"Course JOIN Enrollment ON Course.deptCode = Enrollment.deptCode " .
+						"AND Course.courseNum = Enrollment.courseNum" .
+						" WHERE studentID=" . $_REQUEST["studentID"] . "";
+				dbConnect();
+				
+				if($response) {
+					displayTablePage();
+				}
+				else {
+					echo("<br>No results found.<br>");
+				}
+			}
+			
+			dbDisconnect();
 		}
 		
 		
@@ -142,7 +261,7 @@
 		}
 		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "displayTable") {
 			#PARSE AND DISPLAY TABLE
-			
+			displayTable();
 		}
 		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "addStudent") {
 			#HTML FOR TAKING USER INPUT FOR ADDING A STUDENT
@@ -255,9 +374,52 @@
 			
 			homePageButton();
 		}
-		
-	dbConnect();
-	dbDisconnect();
-	
+		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "dbAddCourse") {
+			$error = false;
+			if($_REQUEST["courseNum"] == "") {
+				echo("<br>Invalid or no entry for the course number.<br>");
+				$error = true;
+			}
+			if($_REQUEST["courseTitle"] == "") {
+				echo("<br>Invalid or no entry for the course title.<br>");
+				$error = true;
+			}
+			if($_REQUEST["creditHours"] == "") {
+				echo("<br>Invalid or no entry entered for the credit hours.<br>");
+				$error = true;
+			}
+			
+			if (!$error) {
+				dbAddCourse();
+			}
+			
+			homePageButton();
+		}
+		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "dbAddApplication") {
+			$error = false;
+			if($_REQUEST["studentId"] == "") {
+				echo("Invalid or no entry entered for the student ID.");
+				$error = true;
+			}
+			if($_REQUEST["courseNum"] == "") {
+				echo("Invalid or no entry entered for the student ID.");
+				$error = true;
+			}
+			if (!$error) {
+				dbAddApplication();
+			}
+			
+			homePageButton();
+		}
+		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "dbGetCoursesByDept") {
+			dbGetCoursesByDept();
+			homePageButton();
+		}
+		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "dbGetCoursesByStudent") {
+			dbGetCoursesByStudent();
+			homePageButton();
+		}
+		dbConnect();
+		dbDisconnect();
 	?>
 </body>
