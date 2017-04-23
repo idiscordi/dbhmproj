@@ -440,11 +440,11 @@
 		}
 		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "dbGetCoursesByDept") {
 			dbGetCoursesByDept();
-			homePageButton();
+			#homePageButton();
 		}
 		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "dbGetCoursesByStudent") {
 			dbGetCoursesByStudent();
-			homePageButton();
+			#homePageButton();
 		}
 		dbConnect();
 		dbDisconnect();
