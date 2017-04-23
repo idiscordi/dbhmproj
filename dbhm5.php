@@ -209,28 +209,85 @@
 		
 		function homepage() {
 			?>
-			
+			<form method="POST">
+				<label for="Selection">Command: </label>
+				<select id="pageChoice" name="pageChoice">
+					<option value="default">Select Command</option>
+					<option value="addStudent">Add Student</option>
+					<option value="addCourse">Add Course</option>
+					<option value="addApplication">Add Enrollment App</option>
+					<option value="getStudents">Show All Students</option>
+					<option value="getCoursesByDept">Show Courses by Dept</option>
+					<option value="getCourseByStudent">Show Courses by Student</option>
+				</select>
+				<input type="submit" name="choice" value="Submit"/>
+			</form>
 		<?php
 		}
 		
 		#take user input for adding a student
 		function addStudentPage() {
 			?>
-			
+			<form method="POST">
+				<label for="Selection">Major: </label>
+				<select id="dept" name="dept">
+					<option value="CSCE">CSCE</option>
+					<option value="ELEG">ELEG</option>
+					<option value="MATH">MATH</option>
+					<option value="PHIL">PHIL</option>
+				</select>
+				<br>
+				Student Name: <input type="text" name="studentName" id="studentName" value=""/>
+				<br>
+				<input type=hidden name="pageChoice" id="pageChoice" value="dbAddStudent"/>
+				<input type="submit" name="choice" value="Submit"/>
+			</form>
 		<?php
 		}
 		
 		#take user input for adding a course
 		function addCoursePage() {
 			?>
-			
+			<form method="POST">
+				<label for="Selection">Department: </label>
+				<select id="dept" name="dept">
+					<option value="CSCE">CSCE</option>
+					<option value="ELEG">ELEG</option>
+					<option value="MATH">MATH</option>
+					<option value="PHIL">PHIL</option>
+				</select>
+				<br>
+				Course Number: <input type="text" name="courseNum" id="courseNum" value=""/>
+				<br>
+				Course Title: <input type="text" name="courseTitle" id="courseTitle" value=""/>
+				<br>
+				Credit Hours: <input type="text" name="creditHours" id="creditHours" value=""/>
+				<br>
+				<input type=hidden name="pageChoice" id="pageChoice" value="dbAddCourse"/>
+				<input type="submit" name="choice" value="Submit"/>
+			</form>
 		<?php
 		}
 		
 		#take user input for adding an application
 		function addApplicationPage() {
 			?>
-			
+			<form method="POST">
+				<label for="Selection">Course Dept: </label>
+				<select id="dept" name="dept">
+					<option value="CSCE">CSCE</option>
+					<option value="ELEG">ELEG</option>
+					<option value="MATH">MATH</option>
+					<option value="PHIL">PHIL</option>
+				</select>
+				<br>
+				Student ID: <input type="text" name="studentID" id="studentID" value=""/>
+				<br>
+				Course Number: <input type="text" name="courseNum" id="courseNum" value=""/>
+				<br>
+				<input type=hidden name="pageChoice" id="pageChoice" value="dbAddApplication"/>
+				<input type="submit" name="choice" value="Submit"/>
+			</form>
 		<?php
 		}
 		
@@ -278,21 +335,7 @@
 		
 		if (!isset($_REQUEST["pageChoice"]) || $_REQUEST["pageChoice"] == "default") {
 			#HTML FOR HOMEPAGE IF NO SELECTION SET
-			?>
-			<form method="POST">
-				<label for="Selection">Command: </label>
-				<select id="pageChoice" name="pageChoice">
-					<option value="default">Select Command</option>
-					<option value="addStudent">Add Student</option>
-					<option value="addCourse">Add Course</option>
-					<option value="addApplication">Add Enrollment App</option>
-					<option value="getStudents">Show All Students</option>
-					<option value="getCoursesByDept">Show Courses by Dept</option>
-					<option value="getCourseByStudent">Show Courses by Student</option>
-				</select>
-				<input type="submit" name="choice" value="Submit"/>
-			</form>
-		<?php 
+			homepage();
 		}
 		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "displayTable") {
 			#PARSE AND DISPLAY TABLE
@@ -300,68 +343,17 @@
 		}
 		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "addStudent") {
 			#HTML FOR TAKING USER INPUT FOR ADDING A STUDENT
-			?>
-			<form method="POST">
-				<label for="Selection">Major: </label>
-				<select id="dept" name="dept">
-					<option value="CSCE">CSCE</option>
-					<option value="ELEG">ELEG</option>
-					<option value="MATH">MATH</option>
-					<option value="PHIL">PHIL</option>
-				</select>
-				<br>
-				Student Name: <input type="text" name="studentName" id="studentName" value=""/>
-				<br>
-				<input type=hidden name="pageChoice" id="pageChoice" value="dbAddStudent"/>
-				<input type="submit" name="choice" value="Submit"/>
-			</form>
-		<?php
+			addStudentPage();
 			homePageButton();
 		}
 		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "addCourse") {
 			#HTML FOR TAKING USER INPUT FOR ADDING A COURSE
-			?>
-			<form method="POST">
-				<label for="Selection">Department: </label>
-				<select id="dept" name="dept">
-					<option value="CSCE">CSCE</option>
-					<option value="ELEG">ELEG</option>
-					<option value="MATH">MATH</option>
-					<option value="PHIL">PHIL</option>
-				</select>
-				<br>
-				Course Number: <input type="text" name="courseNum" id="courseNum" value=""/>
-				<br>
-				Course Title: <input type="text" name="courseTitle" id="courseTitle" value=""/>
-				<br>
-				Credit Hours: <input type="text" name="creditHours" id="creditHours" value=""/>
-				<br>
-				<input type=hidden name="pageChoice" id="pageChoice" value="dbAddCourse"/>
-				<input type="submit" name="choice" value="Submit"/>
-			</form>
-		<?php
+			addCoursePage();
 			homePageButton();
 		}
 		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "addApplication") {
 			#HTML FOR TAKING USER INPUT TO ADD AN APPLICATION
-			?>
-			<form method="POST">
-				<label for="Selection">Course Dept: </label>
-				<select id="dept" name="dept">
-					<option value="CSCE">CSCE</option>
-					<option value="ELEG">ELEG</option>
-					<option value="MATH">MATH</option>
-					<option value="PHIL">PHIL</option>
-				</select>
-				<br>
-				Student ID: <input type="text" name="studentID" id="studentID" value=""/>
-				<br>
-				Course Number: <input type="text" name="courseNum" id="courseNum" value=""/>
-				<br>
-				<input type=hidden name="pageChoice" id="pageChoice" value="dbAddApplication"/>
-				<input type="submit" name="choice" value="Submit"/>
-			</form>
-		<?php
+			addApplicationPage();
 			homePageButton();
 		}
 		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "getStudents") {
