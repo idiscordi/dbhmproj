@@ -59,10 +59,10 @@
 				$response = mysqli_query($dbconn, $query);
 			}
 			if (!$response) {
-				echo("<br>No data found.<br>");
+				echo("<br>Unable to perform request.<br>");
 			}
 			else {
-				displayTablePage();
+				echo("<br>Added.<br>");
 			}
 			
 			dbDisconnect();
@@ -76,7 +76,7 @@
 			dbConnect();
 			
 			if($_REQUEST["courseNum"] == "" || !ctype_digit($_REQUEST["courseNum"]) ||
-				(ctype_digit($_REQUEST["courseNum"]) && courseNum >= 9999) ) {
+				(ctype_digit($_REQUEST["courseNum"]) && $_REQUEST["courseNum"] >= 9999) ) {
 					
 				$error = true;
 				echo("<br>Invalid course number given.  May only contain numerals 0-9, and less than 10000<br>");
@@ -94,37 +94,51 @@
 			if(!$error) {
 				$query = "INSERT INTO Course (deptCode, courseNum, title, creditHours) " .
 						"VALUES ('" . $_REQUEST["dept"] . "', " . $_REQUEST["courseNum"] . ", '" .
-						$_REQUEST["courseTitle"] . "', " . $_REQUEST["creditHours"] . "";
+						$_REQUEST["courseTitle"] . "', " . $_REQUEST["creditHours"] . ")";
+				#echo($query);
 				dbConnect();
-				
-				
+				$response = mysqli_query($dbconn, $query);
+			}
+			if (!$response) {
+				echo("<br>Unable to perform request.<br>");
+			}
+			else {
+				echo("<br>Added.<br>");
 			}
 			dbDisconnect();
 		}
 		
 		#form and submit query for adding application
 		function dbAddApplication() {
-			global $dbconn;
+			global $dbconn, $response;
 			$queryStr;
 			$error = false;
 			
 			if($_REQUEST["courseNum"] == "" || !ctype_digit($_REQUEST["courseNum"]) ||
-				(ctype_digit($_REQUEST["courseNum"]) && courseNum >= 9999) ) {
+				(ctype_digit($_REQUEST["courseNum"]) && $_REQUEST["courseNum"] >= 9999) ) {
 				
 				$error = true;
 				echo("<br>Invalid course number given.  May only contain numerals 0-9, and less than 10000<br>");
 			}
-			if($_REQUEST["studentName"] == "" || !ctype_alpha(str_replace(' ', '', $_REQUEST["studentName"]))) {
+			if($_REQUEST["studentID"] == "" || !ctype_digit($_REQUEST["studentID"])) {
 				$error = true;
 				echo("<br>Invalid student name given.  May not contain numeral, apostrophe, or dash<br>");
 			}
 			
 			if(!$error) {
+				$query = "INSERT INTO Enrollment (studentID, courseNum, deptCode) VALUES " .
+						"(" . $_REQUEST["studentID"] . ", " . $_REQUEST["courseNum"] . ", '" .
+						$_REQUEST["dept"] . "')";
 				dbConnect();
-				
-				
+				$response = mysqli_query($dbconn, $query);
 			}
 			
+			if(!$response) {
+				echo("<br>Unable to perform request.<br>");
+			}
+			else {
+				echo("<br>Added.<br>");
+			}
 			dbDisconnect();
 		}
 		
@@ -160,15 +174,13 @@
 			else {
 				echo("<br>No results found.<br>");
 			}
-				
-			displayTablePage();
 			
-			dbDiscconnect();
+			dbDisconnect();
 		}
 		
 		#form and submit query for getting all courses by a student
 		function dbGetCoursesByStudent() {
-			global $dbconn;
+			global $dbconn, $response;
 			$error = false;
 			
 			if(!ctype_digit($_REQUEST["studentID"])) {
@@ -177,12 +189,12 @@
 			}
 			
 			if(!$error) {
-				$query = "SELECT Course.dept, Course.courseNum, title, creditHours FROM" .
-						"Course JOIN Enrollment ON Course.deptCode = Enrollment.deptCode " .
+				$query = "SELECT Course.deptCode, Course.courseNum, title, creditHours FROM" .
+						" Course JOIN Enrollment ON Course.deptCode = Enrollment.deptCode " .
 						"AND Course.courseNum = Enrollment.courseNum" .
 						" WHERE studentID=" . $_REQUEST["studentID"] . "";
 				dbConnect();
-				
+				$response = mysqli_query($dbconn, $query);
 				if($response) {
 					displayTablePage();
 				}
@@ -224,10 +236,33 @@
 		
 		#display return from query as a table
 		function displayTablePage() {
-			?>
-			
-			<br>
-		<?php
+			global $response;
+			$temp = $response->fetch_fields();
+			try
+		    {
+				echo '<table>';
+
+				// Output header row from keys.
+				echo '<tr>';
+				foreach($temp as $tempVal)
+					echo '<th>' . $tempVal->name . '</th>';
+				echo '</tr>';
+
+				// Output data rows from keys.
+				foreach ($response as $row) 
+				{
+					echo '<tr>';
+					foreach($row as $key => $field) 
+					   echo '<td>' . $field . '</td>';
+					echo '</tr>';
+				}
+				echo '</table>';
+		    }
+			catch (Exception $e) 
+			{
+				die('Error : ' . $e->getMessage());
+			}
+
 			homePageButton();
 		}
 		
@@ -397,12 +432,12 @@
 		}
 		else if(isset($_REQUEST) && $_REQUEST["pageChoice"] == "dbAddApplication") {
 			$error = false;
-			if($_REQUEST["studentId"] == "") {
+			if($_REQUEST["studentID"] == "") {
 				echo("Invalid or no entry entered for the student ID.");
 				$error = true;
 			}
 			if($_REQUEST["courseNum"] == "") {
-				echo("Invalid or no entry entered for the student ID.");
+				echo("Invalid or no entry entered for the course number.");
 				$error = true;
 			}
 			if (!$error) {
